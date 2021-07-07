@@ -36,6 +36,17 @@ const PostSchema = new Schema(
             type: String,
             required: true,
         },
+        comments: [
+            {
+                comment: String,
+                rate: {
+                    type: Number,
+                    min: 1,
+                    max: 5,
+                    default: 1,
+                }
+            }
+        ]
     },
     {
         timestamps: true,

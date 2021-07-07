@@ -83,4 +83,47 @@ blogPostsRouter.delete('/:postId', async (req, res, next) => {
     }
 })
 
+// =============================================================
+// =============================================================
+
+// =========  CREATES A NEW COMMENT ON A BLOG POST =============
+
+blogPostsRouter.post('/:postId', async (req, res, next) => {
+    try {
+        const commentToInsert = {...req.body, createdAt: new Date(), updatedAt: new Date()}
+
+        const postId = req.params.postId
+        const updatedPost = await PostModel.findByIdAndUpdate(postId, { $push: {comments: commentToInsert}}, { new: true, runValidators: true })
+
+        if(updatedPost) {
+            res.send(updatedPost)
+        } else {
+            next(createError(404, `Post with _id ${postId} Not Found!`))
+        }
+    } catch (error) {
+        if(error.name === "validationError") {
+            next(createError(400, error))
+        } else {
+        next(createError(500, `An Error ocurred while creating a comment on post ID: ${req.params.postId}`))
+        }
+    }
+})
+
+// =========  RETRIEVES A LIST OF COMMENTS FROM A BLOG POST =============
+
+blogPostsRouter.get('/:postId/comments', async (req, res, next) => {
+    try {
+        const postId = req.params.postId
+        const post = await PostModel.findById(postId)
+
+        if (post) {
+            res.send(post.comments)
+        } else {
+            next(createError(404, `Post with _id ${postId} Not Found!`))
+        }
+    } catch (error) {
+        next(createError(500, "An Error ocurred while getting the list of comments"))
+    }
+})
+
 export default blogPostsRouter
