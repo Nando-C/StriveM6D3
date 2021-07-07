@@ -149,7 +149,7 @@ blogPostsRouter.get('/:postId/comments/:commentId', async (req, res, next) => {
     }
 })
 
-// =========  DELETES A SINGLE COMMENT FROM A BLOG POST =============
+// =========  DELETES A COMMENT FROM A BLOG POST =============
 
 blogPostsRouter.delete('/:postId/comments/:commentId', async (req, res, next) => {
     try {
@@ -164,6 +164,28 @@ blogPostsRouter.delete('/:postId/comments/:commentId', async (req, res, next) =>
         }
     } catch (error) {
         next(createError(500, `An Error ocurred while deleting comment with ID: ${req.params.commentId}`))
+    }
+})
+
+// =========  UPDATES A COMMENT ON A BLOG POST =============
+
+blogPostsRouter.put('/:postId/comments/:commentId', async (req, res, next) => {
+    try {
+        const postId = req.params.postId
+        const commentId = req.params.commentId
+
+        const post = await PostModel.findByIdAndUpdate( 
+            { _id: postId , "comments._id": commentId, }, 
+            { $set: { "comments.$": req.body, }}, 
+            { new: true, runValidators: true, }
+        )
+        if (post) {
+            res.send(post)
+        } else {
+            next(createError(404, `Post with _id ${postId} Not Found!`))
+        }
+    } catch (error) {
+        next(createError(500, `An Error ocurred while updating comment with ID: ${req.params.commentId}`))
     }
 })
 export default blogPostsRouter
