@@ -174,7 +174,7 @@ blogPostsRouter.put('/:postId/comments/:commentId', async (req, res, next) => {
         const postId = req.params.postId
         const commentId = req.params.commentId
 
-        const post = await PostModel.findByIdAndUpdate( 
+        const post = await PostModel.findOneAndUpdate( 
             { _id: postId , "comments._id": commentId, }, 
             { $set: { "comments.$": req.body, }}, 
             { new: true, runValidators: true, }
