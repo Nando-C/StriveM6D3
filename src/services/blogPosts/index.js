@@ -133,17 +133,37 @@ blogPostsRouter.get('/:postId/comments/:commentId', async (req, res, next) => {
         const postId = req.params.postId
         const commentId = req.params.commentId
         const postComment = await PostModel.findById(postId, { comments: { $elemMatch: { _id: commentId}}})
+        
         if (postComment) {
             if (postComment.comments.length > 0) {
                 res.send(postComment.comments[0])
             } else {
                 next(createError(404, `Comment with _id ${commentId} Not Found!`))
             }
+
         } else {
             next(createError(404, `Post with _id ${postId} Not Found!`))
         }
     } catch (error) {
-        next(createError(500, "An Error ocurred while getting comment with ID: "))
+        next(createError(500, `An Error ocurred while getting comment with ID: ${req.params.commentId}`))
+    }
+})
+
+// =========  DELETES A SINGLE COMMENT FROM A BLOG POST =============
+
+blogPostsRouter.delete('/:postId/comments/:commentId', async (req, res, next) => {
+    try {
+        const postId = req.params.postId
+        const commentId = req.params.commentId
+        const post = await PostModel.findByIdAndUpdate(postId, { $pull: { comments: {_id: commentId}}}, { new: true })
+
+        if (post) {
+            res.send(post)
+        } else {
+            next(createError(404, `Post with _id ${postId} Not Found!`))
+        }
+    } catch (error) {
+        next(createError(500, `An Error ocurred while deleting comment with ID: ${req.params.commentId}`))
     }
 })
 export default blogPostsRouter
