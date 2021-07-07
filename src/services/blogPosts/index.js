@@ -126,4 +126,24 @@ blogPostsRouter.get('/:postId/comments', async (req, res, next) => {
     }
 })
 
+// =========  RETRIEVES A SINGLE COMMENT FROM A BLOG POST =============
+
+blogPostsRouter.get('/:postId/comments/:commentId', async (req, res, next) => {
+    try {
+        const postId = req.params.postId
+        const commentId = req.params.commentId
+        const postComment = await PostModel.findById(postId, { comments: { $elemMatch: { _id: commentId}}})
+        if (postComment) {
+            if (postComment.comments.length > 0) {
+                res.send(postComment.comments[0])
+            } else {
+                next(createError(404, `Comment with _id ${commentId} Not Found!`))
+            }
+        } else {
+            next(createError(404, `Post with _id ${postId} Not Found!`))
+        }
+    } catch (error) {
+        next(createError(500, "An Error ocurred while getting comment with ID: "))
+    }
+})
 export default blogPostsRouter
